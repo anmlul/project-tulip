@@ -98,6 +98,12 @@
     .love-list li:hover .love-heart{opacity:1;transform:scale(1) translateY(0);}
     .back-btn{background:none;border:1px solid var(--border);color:var(--muted);border-radius:100px;padding:8px 20px;font-family:'DM Sans',sans-serif;font-size:.78rem;letter-spacing:.06em;text-transform:uppercase;cursor:none;transition:border-color .2s,color .2s,transform .2s;margin-top:6px;animation:fadeUp .8s .55s both;}
     .back-btn:hover{border-color:var(--border-h);color:var(--text);transform:translateY(-1px);}
+    .two-locations{display:flex;flex-direction:column;gap:0;}
+    .loc-block{padding:4px 0;}
+    .conn-line{display:flex;align-items:center;gap:8px;margin-top:14px;padding-top:12px;border-top:1px solid var(--border);}
+    .conn-dot{width:5px;height:5px;border-radius:50%;background:var(--pink);box-shadow:0 0 6px var(--pink);flex-shrink:0;animation:dotP 2s ease-in-out infinite;}
+    .conn-label{flex:1;text-align:center;font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;color:var(--pink);opacity:.7;position:relative;}
+    .conn-label::before{content:'';position:absolute;top:50%;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,45,85,.3),transparent);}
     .fheart{position:fixed;pointer-events:none;z-index:5;color:var(--pink);animation:fhA linear forwards;}
     @keyframes fhA{0%{opacity:.9;transform:translateY(0) scale(1) rotate(0deg)}100%{opacity:0;transform:translateY(-200px) scale(.3) rotate(20deg)}}
     @keyframes fadeUp{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}
@@ -180,13 +186,28 @@
     </div>
 
     <div class="card card-coords"><div class="shim"></div>
-      <div class="card-label">Where I Am</div>
-      <div class="coords">
-        <div class="coord-item"><div class="coord-value">53.3601° N</div><div class="coord-key">Latitude</div></div>
-        <div class="coord-divider"></div>
-        <div class="coord-item"><div class="coord-value">6.2514° W</div><div class="coord-key">Longitude</div></div>
-        <div class="coord-divider"></div>
-        <div class="coord-item"><div class="coord-value">Dublin</div><div class="coord-key">City</div></div>
+      <div class="two-locations">
+        <div class="loc-block">
+          <div class="card-label">Where I Am</div>
+          <div class="coords">
+            <div class="coord-item"><div class="coord-value">53.3601° N</div><div class="coord-key">Latitude</div></div>
+            <div class="coord-divider"></div>
+            <div class="coord-item"><div class="coord-value">6.2514° W</div><div class="coord-key">Longitude</div></div>
+            <div class="coord-divider"></div>
+            <div class="coord-item"><div class="coord-value">Dublin</div><div class="coord-key">City</div></div>
+          </div>
+        </div>
+        <div class="conn-line"><span class="conn-dot"></span><span class="conn-label">Connected</span><span class="conn-dot"></span></div>
+        <div class="loc-block">
+          <div class="card-label">Where You Are</div>
+          <div class="coords">
+            <div class="coord-item"><div class="coord-value">13.1424° N</div><div class="coord-key">Latitude</div></div>
+            <div class="coord-divider"></div>
+            <div class="coord-item"><div class="coord-value">123.7138° E</div><div class="coord-key">Longitude</div></div>
+            <div class="coord-divider"></div>
+            <div class="coord-item"><div class="coord-value">Daraga</div><div class="coord-key">Albay, PH</div></div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -259,17 +280,19 @@ document.getElementById('enterBtn').addEventListener('mousedown',function(e){
 /* headline char reveal */
 (function(){
   const el=document.getElementById('headline');
-  const line1='The Ship'.split('');
-  const line2a='is '.split('');
-  const line2b='Steady.'.split('');
   let delay=0;
-  const add=(ch,parent,d)=>{const s=document.createElement('span');s.className='ch';s.style.animationDelay=(d*.055)+'s';s.textContent=ch===' '?'\u00a0':ch;parent.appendChild(s);};
-  line1.forEach(ch=>{add(ch,el,delay);delay++;});
+  const addCh=(ch,parent,d,italic)=>{
+    const s=document.createElement('span');
+    s.className='ch';
+    if(italic)s.style.cssText='font-style:italic;background:linear-gradient(135deg,#ff6b88,#ff2d55);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;';
+    s.style.animationDelay=(d*.055)+'s';
+    s.textContent=ch===' '?'\u00a0':ch;
+    parent.appendChild(s);
+  };
+  'The Ship'.split('').forEach(ch=>{addCh(ch,el,delay,false);delay++;});
   el.appendChild(document.createElement('br'));
-  line2a.forEach(ch=>{add(ch,el,delay);delay++;});
-  const em=document.createElement('em');em.style.display='inline';
-  line2b.forEach(ch=>{add(ch,em,delay);delay++;});
-  el.appendChild(em);
+  'is '.split('').forEach(ch=>{addCh(ch,el,delay,false);delay++;});
+  'Steady.'.split('').forEach(ch=>{addCh(ch,el,delay,true);delay++;});
 })();
 
 /* 3d tilt */
