@@ -26,8 +26,8 @@
     @keyframes op{0%,100%{opacity:.6;transform:translate(-50%,-50%) scale(1)}50%{opacity:1;transform:translate(-50%,-50%) scale(1.15)}}
     body::after{content:'';position:fixed;inset:0;z-index:1;pointer-events:none;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");opacity:.55;}
     #app{position:relative;z-index:10;width:100%;height:100%;display:flex;align-items:center;justify-content:center;}
-    .screen{position:absolute;width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;transition:opacity .7s cubic-bezier(.4,0,.2,1),transform .7s cubic-bezier(.4,0,.2,1);}
-    .screen.hidden{opacity:0;pointer-events:none;transform:scale(.97) translateY(16px);}
+    .screen{position:absolute;width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;transition:opacity .7s cubic-bezier(.4,0,.2,1),transform .7s cubic-bezier(.4,0,.2,1);overflow:hidden;}
+    .screen.hidden{opacity:0;pointer-events:none;transform:scale(.97) translateY(16px);}#sanctuary.screen{justify-content:flex-start;overflow:hidden;padding:0;}
     #landing{gap:0;text-align:center;}
     .tulip-wrap{margin-bottom:36px;animation:floatBob 4s ease-in-out infinite;}
     .tulip-wrap svg{width:80px;height:80px;filter:drop-shadow(0 0 22px rgba(255,45,85,.65)) drop-shadow(0 0 44px rgba(255,45,85,.25));}
@@ -48,11 +48,18 @@
     .enter-btn span{position:relative;z-index:1;}
     .ripple{position:absolute;border-radius:50%;background:rgba(255,45,85,.3);transform:scale(0);animation:rip .8s linear forwards;pointer-events:none;}
     @keyframes rip{to{transform:scale(5);opacity:0;}}
-    #sanctuary{width:100%;max-width:980px;display:grid;grid-template-columns:1fr;gap:clamp(8px,1.2vh,14px);overflow-y:auto;padding:clamp(10px,1.8vh,24px) clamp(12px,2vw,24px);align-items:start;max-height:100vh;}
+    #sanctuary{width:100%;max-width:600px;display:flex;flex-direction:column;gap:clamp(8px,1.2vh,14px);overflow-y:auto;-webkit-overflow-scrolling:touch;padding:clamp(10px,1.8vh,24px) clamp(12px,2vw,20px);align-items:stretch;flex:1;min-height:0;}
     #sanctuary::-webkit-scrollbar{width:0;}
+    /* reorder cards on mobile via order */
+    .sanc-header{order:0;}
+    .card-audio{order:1;}
+    .card-music{order:2;}
+    .card-love{order:3;}
+    .card-coords{order:4;}
+    .back-btn{order:5;}
     @media(min-width:720px) and (min-height:560px){
-      #sanctuary{grid-template-columns:1fr 1fr;grid-template-areas:"header header" "audio music" "love love" "coords coords" "back back";}
-      .sanc-header{grid-area:header;}.card-audio{grid-area:audio;}.card-music{grid-area:music;}.card-love{grid-area:love;}.card-coords{grid-area:coords;}.back-btn{grid-area:back;}
+      #sanctuary{max-width:980px;display:grid;grid-template-columns:1fr 1fr;grid-template-areas:"header header" "audio music" "love love" "coords coords" "back back";}
+      .sanc-header{grid-area:header;order:unset;}.card-audio{grid-area:audio;order:unset;}.card-music{grid-area:music;order:unset;}.card-love{grid-area:love;order:unset;}.card-coords{grid-area:coords;order:unset;}.back-btn{grid-area:back;order:unset;}
     }
     @media(min-width:1080px) and (min-height:620px){
       #sanctuary{max-width:1080px;grid-template-columns:1fr 1fr 1fr;grid-template-areas:"header header header" "audio music coords" "love love love" "back back back";}
@@ -212,6 +219,7 @@
     </div>
 
     <button class="back-btn" onclick="goBack()">← Back to Landing</button>
+  </section>
   </section>
 </div>
 
