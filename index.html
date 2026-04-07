@@ -1,48 +1,31 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Project Tulip | The Ship</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-    <div id="overlay">
-        <div class="content">
-            <h1>The Ship is Steady.</h1>
-            <p>Scan successful. Heart synchronized.</p>
-            <button onclick="enterSite()">Enter Sanctuary</button>
-        </div>
+<div id="app">
+    <div id="bg-glow"></div>
+    
+    <div id="landing" class="glass-card">
+        <div class="tulip-icon">🌷</div>
+        <h1>The Ship is Steady</h1>
+        <p>Dublin ———→ Philippines</p>
+        <button class="glow-btn" onclick="engage()">Initiate Connection</button>
     </div>
 
-    <main id="main-content" style="display: none;">
-        <div class="container">
-            <header>
-                <h2>For My Tulip 🌷</h2>
-                <div class="coordinates">53.3498° N, 6.2603° W (Dublin)</div>
-            </header>
-
-            <section class="card">
-                <h3>A Voice from Dublin</h3>
-                <p>Play this when the storm gets too loud.</p>
-                <audio controls>
-                    <source src="voice-memo.mp3" type="audio/mpeg">
-                    Your browser does not support the audio element.
-                </audio>
-            </section>
-
-            <section class="card">
-                <h3>Our Soundtrack</h3>
-                <iframe allow="autoplay *; encrypted-media *; fullscreen *; clipboard-write" frameborder="0" height="175" style="width:100%;max-width:660px;overflow:hidden;border-radius:10px;" sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-storage-access-by-user-activation allow-top-navigation-by-user-activation" src="https://embed.music.apple.com/ie/playlist/the-ship/pl.u-your-playlist-id"></iframe>
-            </section>
-
-            <footer>
-                <p>Status: <span class="status">Loved Forever</span></p>
-                <div class="dev-note"></div>
-            </footer>
+    <div id="sanctuary" style="display: none;">
+        <div class="glass-card">
+            <h3>Voice from Drumcondra</h3>
+            <div class="audio-wrapper">
+                <audio id="player" controls src="voice-memo.mp3"></audio>
+            </div>
         </div>
-    </main>
 
-    <script src="script.js"></script>
-</body>
-</html>
+        <div class="glass-card">
+            <h3>Our Future Soundtrack</h3>
+            <a href="YOUR_APPLE_MUSIC_LINK" class="apple-btn">
+                <span></span> Open Apple Music
+            </a>
+        </div>
+
+        <div class="status-bar">
+            <span>Lat: 53.3601° N</span>
+            <span class="pulse">● LIVE</span>
+        </div>
+    </div>
+</div>
