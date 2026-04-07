@@ -1,31 +1,657 @@
-<div id="app">
-    <div id="bg-glow"></div>
-    
-    <div id="landing" class="glass-card">
-        <div class="tulip-icon">🌷</div>
-        <h1>The Ship is Steady</h1>
-        <p>Dublin ———→ Philippines</p>
-        <button class="glow-btn" onclick="engage()">Initiate Connection</button>
-    </div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Project Tulip | Dublin Connected</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
 
-    <div id="sanctuary" style="display: none;">
-        <div class="glass-card">
-            <h3>Voice from Drumcondra</h3>
-            <div class="audio-wrapper">
-                <audio id="player" controls src="voice-memo.mp3"></audio>
+  <style>
+    /* ─── Variables ─── */
+    :root {
+      --black:   #020204;
+      --deep:    #0a0a0f;
+      --pink:    #ff2d55;
+      --rose:    #ff6b88;
+      --glow:    rgba(255, 45, 85, 0.18);
+      --glass:   rgba(255, 255, 255, 0.04);
+      --glass-h: rgba(255, 255, 255, 0.08);
+      --border:  rgba(255, 255, 255, 0.09);
+      --border-h:rgba(255, 45, 85, 0.35);
+      --text:    #f0eae8;
+      --muted:   rgba(240, 234, 232, 0.45);
+      --green:   #34c759;
+    }
+
+    /* ─── Reset ─── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      width: 100%; height: 100%; overflow: hidden;
+      background: var(--black);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ─── Canvas starfield ─── */
+    #stars { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+
+    /* ─── Glow orbs ─── */
+    .orb {
+      position: fixed; border-radius: 50%;
+      filter: blur(90px); pointer-events: none; z-index: 0;
+      will-change: transform;
+    }
+    .orb-1 {
+      width: 520px; height: 520px;
+      background: radial-gradient(circle, rgba(255,45,85,0.14) 0%, transparent 70%);
+      top: -10%; left: -10%;
+      animation: orbDrift1 22s ease-in-out infinite alternate;
+    }
+    .orb-2 {
+      width: 380px; height: 380px;
+      background: radial-gradient(circle, rgba(255,107,136,0.10) 0%, transparent 70%);
+      bottom: -5%; right: -5%;
+      animation: orbDrift2 18s ease-in-out infinite alternate;
+    }
+    .orb-3 {
+      width: 260px; height: 260px;
+      background: radial-gradient(circle, rgba(255,45,85,0.08) 0%, transparent 70%);
+      top: 50%; left: 50%; transform: translate(-50%,-50%);
+      animation: orbPulse 6s ease-in-out infinite;
+    }
+
+    @keyframes orbDrift1 {
+      from { transform: translate(0, 0); }
+      to   { transform: translate(12%, 18%); }
+    }
+    @keyframes orbDrift2 {
+      from { transform: translate(0, 0); }
+      to   { transform: translate(-14%, -12%); }
+    }
+    @keyframes orbPulse {
+      0%, 100% { opacity: 0.6; transform: translate(-50%,-50%) scale(1); }
+      50%       { opacity: 1;   transform: translate(-50%,-50%) scale(1.15); }
+    }
+
+    /* ─── Noise grain overlay ─── */
+    body::after {
+      content: '';
+      position: fixed; inset: 0; z-index: 1; pointer-events: none;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      opacity: 0.55;
+    }
+
+    /* ─── App wrapper ─── */
+    #app {
+      position: relative; z-index: 10;
+      width: 100%; height: 100%;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    /* ─── Screens ─── */
+    .screen {
+      position: absolute; width: 100%; height: 100%;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 24px;
+      transition: opacity 0.7s cubic-bezier(.4,0,.2,1),
+                  transform 0.7s cubic-bezier(.4,0,.2,1);
+    }
+    .screen.hidden {
+      opacity: 0; pointer-events: none;
+      transform: scale(0.97) translateY(16px);
+    }
+
+    /* ─── Landing ─── */
+    #landing {
+      gap: 0;
+      align-items: center;
+      text-align: center;
+    }
+
+    /* Tulip SVG animation */
+    .tulip-wrap {
+      margin-bottom: 36px;
+      animation: floatBob 4s ease-in-out infinite;
+    }
+    .tulip-wrap svg {
+      width: 72px; height: 72px;
+      filter: drop-shadow(0 0 18px rgba(255,45,85,0.55));
+    }
+
+    @keyframes floatBob {
+      0%, 100% { transform: translateY(0px); }
+      50%       { transform: translateY(-10px); }
+    }
+
+    .headline {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(2.8rem, 8vw, 5rem);
+      font-weight: 300;
+      letter-spacing: -0.02em;
+      line-height: 1.08;
+      color: var(--text);
+      margin-bottom: 18px;
+      animation: fadeUp 1s 0.2s both;
+    }
+    .headline em {
+      font-style: italic;
+      background: linear-gradient(135deg, var(--rose), var(--pink));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .status-pill {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--glass);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      padding: 8px 18px;
+      font-size: 0.78rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 52px;
+      animation: fadeUp 1s 0.4s both;
+      backdrop-filter: blur(12px);
+    }
+    .status-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 8px var(--green);
+      animation: dotPulse 2s ease-in-out infinite;
+    }
+    @keyframes dotPulse {
+      0%, 100% { box-shadow: 0 0 6px var(--green); }
+      50%       { box-shadow: 0 0 14px var(--green), 0 0 22px rgba(52,199,89,0.4); }
+    }
+
+    .enter-btn {
+      position: relative;
+      display: inline-flex; align-items: center; gap: 10px;
+      background: white;
+      color: #0a0a0f;
+      border: none;
+      padding: 17px 44px;
+      border-radius: 100px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.92rem;
+      font-weight: 500;
+      letter-spacing: 0.02em;
+      cursor: pointer;
+      overflow: hidden;
+      animation: fadeUp 1s 0.6s both;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      box-shadow: 0 4px 40px rgba(255,255,255,0.12);
+    }
+    .enter-btn::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(135deg, #fff 0%, #ffd6df 100%);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .enter-btn:hover::before { opacity: 1; }
+    .enter-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 50px rgba(255,255,255,0.2); }
+    .enter-btn:active { transform: translateY(0); }
+    .enter-btn span { position: relative; z-index: 1; }
+
+    /* ─── Sanctuary ─── */
+    #sanctuary {
+      max-width: 460px;
+      width: 100%;
+      gap: 16px;
+      overflow-y: auto;
+      padding: 32px 20px;
+      align-items: stretch;
+    }
+
+    .sanctuary-header {
+      text-align: center;
+      margin-bottom: 8px;
+      animation: fadeUp 0.8s 0.1s both;
+    }
+    .sanctuary-header h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1.8rem, 5vw, 2.4rem);
+      font-weight: 300;
+      letter-spacing: -0.01em;
+      color: var(--text);
+    }
+    .sanctuary-header p {
+      font-size: 0.8rem;
+      color: var(--muted);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-top: 6px;
+    }
+
+    /* Glass card */
+    .card {
+      background: var(--glass);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 26px 28px;
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      transition: border-color 0.3s, background 0.3s, transform 0.25s;
+      animation: fadeUp 0.8s both;
+    }
+    .card:hover {
+      border-color: var(--border-h);
+      background: var(--glass-h);
+      transform: translateY(-3px);
+    }
+    .card:nth-child(2) { animation-delay: 0.15s; }
+    .card:nth-child(3) { animation-delay: 0.25s; }
+    .card:nth-child(4) { animation-delay: 0.35s; }
+
+    .card-label {
+      font-size: 0.68rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--pink);
+      margin-bottom: 10px;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .card-label::before {
+      content: '';
+      display: inline-block;
+      width: 18px; height: 1px;
+      background: var(--pink);
+      opacity: 0.7;
+    }
+
+    .card h3 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.45rem;
+      font-weight: 300;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+    .card p {
+      font-size: 0.83rem;
+      color: var(--muted);
+      line-height: 1.6;
+      margin-bottom: 18px;
+    }
+
+    /* Custom audio player */
+    .audio-wrap {
+      display: flex; align-items: center; gap: 14px;
+    }
+    .play-btn {
+      flex-shrink: 0;
+      width: 52px; height: 52px;
+      border-radius: 50%;
+      border: 1px solid rgba(255,45,85,0.4);
+      background: rgba(255,45,85,0.12);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.2s, border-color 0.2s;
+      color: var(--pink);
+    }
+    .play-btn:hover { background: rgba(255,45,85,0.22); border-color: var(--pink); transform: scale(1.06); }
+    .play-btn svg { width: 20px; height: 20px; }
+
+    .audio-track {
+      flex: 1;
+    }
+    .track-title {
+      font-size: 0.82rem; font-weight: 500; color: var(--text);
+      margin-bottom: 8px;
+    }
+    .progress-bar {
+      position: relative;
+      width: 100%; height: 3px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 10px;
+      cursor: pointer;
+    }
+    .progress-fill {
+      height: 100%; width: 0%;
+      background: linear-gradient(90deg, var(--pink), var(--rose));
+      border-radius: 10px;
+      transition: width 0.1s linear;
+      position: relative;
+    }
+    .progress-fill::after {
+      content: '';
+      position: absolute;
+      right: -4px; top: 50%;
+      transform: translateY(-50%);
+      width: 9px; height: 9px;
+      border-radius: 50%;
+      background: var(--rose);
+      box-shadow: 0 0 8px rgba(255,45,85,0.6);
+    }
+    .time-row {
+      display: flex; justify-content: space-between;
+      font-size: 0.68rem; color: var(--muted);
+      margin-top: 6px;
+    }
+
+    /* Apple Music link */
+    .music-link {
+      display: flex; align-items: center; justify-content: center; gap: 12px;
+      background: linear-gradient(135deg, rgba(255,45,85,0.12), rgba(255,107,136,0.08));
+      border: 1px solid rgba(255,45,85,0.2);
+      border-radius: 14px;
+      padding: 15px 20px;
+      text-decoration: none;
+      color: var(--text);
+      font-size: 0.88rem; font-weight: 500;
+      transition: background 0.2s, border-color 0.2s, transform 0.2s;
+    }
+    .music-link:hover {
+      background: linear-gradient(135deg, rgba(255,45,85,0.2), rgba(255,107,136,0.14));
+      border-color: rgba(255,45,85,0.45);
+      transform: translateY(-2px);
+    }
+    .music-link svg { flex-shrink: 0; }
+
+    /* Coordinates card */
+    .coords {
+      display: flex; justify-content: space-between; align-items: center;
+      gap: 10px;
+    }
+    .coord-item { text-align: center; flex: 1; }
+    .coord-value {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.2rem; font-weight: 300;
+      color: var(--text); letter-spacing: 0.04em;
+    }
+    .coord-key {
+      font-size: 0.65rem; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--muted);
+      margin-top: 3px;
+    }
+    .coord-divider {
+      width: 1px; height: 32px;
+      background: var(--border);
+    }
+
+    /* Back button */
+    .back-btn {
+      background: none; border: 1px solid var(--border);
+      color: var(--muted); border-radius: 100px;
+      padding: 10px 22px; font-family: 'DM Sans', sans-serif;
+      font-size: 0.78rem; letter-spacing: 0.06em;
+      text-transform: uppercase; cursor: pointer;
+      transition: border-color 0.2s, color 0.2s, transform 0.2s;
+      margin-top: 6px;
+      animation: fadeUp 0.8s 0.45s both;
+    }
+    .back-btn:hover { border-color: var(--border-h); color: var(--text); transform: translateY(-1px); }
+
+    /* ─── Shared animations ─── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(22px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ─── Scrollbar styling ─── */
+    #sanctuary::-webkit-scrollbar { width: 0; }
+
+    /* ─── Responsive ─── */
+    @media (max-height: 700px) {
+      #sanctuary { gap: 12px; padding: 20px 16px; }
+      .card { padding: 20px 22px; }
+      .sanctuary-header { margin-bottom: 4px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Starfield canvas -->
+  <canvas id="stars"></canvas>
+
+  <!-- Glow orbs -->
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+
+  <div id="app">
+
+    <!-- ── Landing Screen ── -->
+    <section id="landing" class="screen">
+
+      <div class="tulip-wrap">
+        <svg viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Stem -->
+          <path d="M36 70 Q34 54 36 44" stroke="#ff6b88" stroke-width="1.8" stroke-linecap="round" fill="none">
+            <animate attributeName="d"
+              values="M36 70 Q34 54 36 44;M36 70 Q38 54 36 44;M36 70 Q34 54 36 44"
+              dur="4s" repeatCount="indefinite"/>
+          </path>
+          <!-- Left leaf -->
+          <path d="M36 56 Q26 50 24 42 Q32 44 36 56Z" fill="rgba(255,107,136,0.5)">
+            <animateTransform attributeName="transform" type="rotate"
+              values="0 36 56;-3 36 56;0 36 56" dur="4s" repeatCount="indefinite"/>
+          </path>
+          <!-- Petals -->
+          <ellipse cx="36" cy="22" rx="6" ry="14" fill="url(#pg)" opacity="0.95">
+            <animate attributeName="ry" values="14;15;14" dur="3s" repeatCount="indefinite"/>
+          </ellipse>
+          <ellipse cx="36" cy="22" rx="6" ry="14" fill="url(#pg)" opacity="0.85"
+            transform="rotate(45 36 36)"/>
+          <ellipse cx="36" cy="22" rx="6" ry="14" fill="url(#pg)" opacity="0.75"
+            transform="rotate(90 36 36)"/>
+          <ellipse cx="36" cy="22" rx="6" ry="14" fill="url(#pg)" opacity="0.85"
+            transform="rotate(-45 36 36)"/>
+          <!-- Centre -->
+          <circle cx="36" cy="26" r="5" fill="url(#cc)"/>
+          <defs>
+            <radialGradient id="pg" cx="50%" cy="30%" r="70%">
+              <stop offset="0%" stop-color="#ff6b88"/>
+              <stop offset="100%" stop-color="#ff2d55"/>
+            </radialGradient>
+            <radialGradient id="cc" cx="50%" cy="40%" r="70%">
+              <stop offset="0%" stop-color="#ffd6df"/>
+              <stop offset="100%" stop-color="#ff6b88"/>
+            </radialGradient>
+          </defs>
+        </svg>
+      </div>
+
+      <h1 class="headline">The Ship<br>is <em>Steady.</em></h1>
+
+      <div class="status-pill">
+        <span class="status-dot"></span>
+        Connection Status: Synchronized
+      </div>
+
+      <button class="enter-btn" onclick="enterSanctuary()">
+        <span>Enter Sanctuary</span>
+        <span style="font-size:1.1em; position:relative; z-index:1;">→</span>
+      </button>
+    </section>
+
+    <!-- ── Sanctuary Screen ── -->
+    <section id="sanctuary" class="screen hidden">
+
+      <div class="sanctuary-header">
+        <h2>Your Sanctuary 🌷</h2>
+        <p>Dublin · Connected</p>
+      </div>
+
+      <!-- Voice memo card -->
+      <div class="card">
+        <div class="card-label">Voice Memo</div>
+        <h3>From Dublin, With Love</h3>
+        <p>For when the storm gets too loud. Press play.</p>
+        <div class="audio-wrap">
+          <button class="play-btn" id="playBtn" onclick="togglePlay()">
+            <svg id="playIcon" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M8 5v14l11-7z"/>
+            </svg>
+          </button>
+          <div class="audio-track">
+            <div class="track-title">voice-memo.mp3</div>
+            <div class="progress-bar" id="progressBar" onclick="seekAudio(event)">
+              <div class="progress-fill" id="progressFill"></div>
             </div>
+            <div class="time-row">
+              <span id="currentTime">0:00</span>
+              <span id="duration">—</span>
+            </div>
+          </div>
         </div>
+        <audio id="audioEl" src="voice-memo.mp3" preload="metadata"></audio>
+      </div>
 
-        <div class="glass-card">
-            <h3>Our Future Soundtrack</h3>
-            <a href="YOUR_APPLE_MUSIC_LINK" class="apple-btn">
-                <span></span> Open Apple Music
-            </a>
-        </div>
+      <!-- Apple Music card -->
+      <div class="card">
+        <div class="card-label">Our Soundtrack</div>
+        <h3>The Playlist</h3>
+        <p>Every song is a memory waiting to be made.</p>
+        <a href="YOUR_APPLE_MUSIC_LINK" class="music-link" target="_blank" rel="noopener">
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+            <path d="M11 2C6.03 2 2 6.03 2 11s4.03 9 9 9 9-4.03 9-9-4.03-9-9-9z" fill="rgba(255,45,85,0.2)" stroke="#ff2d55" stroke-width="1"/>
+            <path d="M14.5 8.5H9v5.25a1.75 1.75 0 1 0 1.75 1.75V10h3V8.5z" fill="#ff2d55"/>
+          </svg>
+          Open in Apple Music
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="margin-left:auto; opacity:0.5">
+            <path d="M2 12L12 2M12 2H6M12 2v6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </a>
+      </div>
 
-        <div class="status-bar">
-            <span>Lat: 53.3601° N</span>
-            <span class="pulse">● LIVE</span>
+      <!-- Coordinates card -->
+      <div class="card">
+        <div class="card-label">Where I Am</div>
+        <div class="coords">
+          <div class="coord-item">
+            <div class="coord-value">53.3601° N</div>
+            <div class="coord-key">Latitude</div>
+          </div>
+          <div class="coord-divider"></div>
+          <div class="coord-item">
+            <div class="coord-value">6.2514° W</div>
+            <div class="coord-key">Longitude</div>
+          </div>
+          <div class="coord-divider"></div>
+          <div class="coord-item">
+            <div class="coord-value">Dublin</div>
+            <div class="coord-key">City</div>
+          </div>
         </div>
-    </div>
-</div>
+      </div>
+
+      <button class="back-btn" onclick="goBack()">← Back to Landing</button>
+    </section>
+
+  </div>
+
+  <script>
+    /* ── Starfield ── */
+    (function () {
+      const c = document.getElementById('stars');
+      const ctx = c.getContext('2d');
+      let W, H, stars = [];
+
+      function resize() {
+        W = c.width  = window.innerWidth;
+        H = c.height = window.innerHeight;
+      }
+
+      function initStars(n = 160) {
+        stars = Array.from({ length: n }, () => ({
+          x: Math.random() * W,
+          y: Math.random() * H,
+          r: Math.random() * 1.2 + 0.2,
+          a: Math.random(),
+          da: (Math.random() - 0.5) * 0.003,
+          speed: Math.random() * 0.06 + 0.01,
+        }));
+      }
+
+      function draw() {
+        ctx.clearRect(0, 0, W, H);
+        for (const s of stars) {
+          s.a = Math.max(0.05, Math.min(1, s.a + s.da));
+          if (s.a <= 0.05 || s.a >= 1) s.da *= -1;
+          s.y -= s.speed;
+          if (s.y < -2) { s.y = H + 2; s.x = Math.random() * W; }
+
+          ctx.beginPath();
+          ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(255,210,220,${s.a * 0.7})`;
+          ctx.fill();
+        }
+        requestAnimationFrame(draw);
+      }
+
+      window.addEventListener('resize', () => { resize(); initStars(); });
+      resize(); initStars(); draw();
+    })();
+
+    /* ── Screen transitions ── */
+    function enterSanctuary() {
+      const landing    = document.getElementById('landing');
+      const sanctuary  = document.getElementById('sanctuary');
+      landing.classList.add('hidden');
+      setTimeout(() => { sanctuary.classList.remove('hidden'); }, 400);
+    }
+
+    function goBack() {
+      const landing   = document.getElementById('landing');
+      const sanctuary = document.getElementById('sanctuary');
+      sanctuary.classList.add('hidden');
+      setTimeout(() => { landing.classList.remove('hidden'); }, 400);
+    }
+
+    /* ── Custom audio player ── */
+    const audio        = document.getElementById('audioEl');
+    const playBtn      = document.getElementById('playBtn');
+    const playIcon     = document.getElementById('playIcon');
+    const progressFill = document.getElementById('progressFill');
+    const currentTimeEl= document.getElementById('currentTime');
+    const durationEl   = document.getElementById('duration');
+
+    const PLAY_PATH  = 'M8 5v14l11-7z';
+    const PAUSE_PATH = 'M6 19h4V5H6v14zm8-14v14h4V5h-4z';
+
+    function fmt(s) {
+      const m = Math.floor(s / 60);
+      return `${m}:${String(Math.floor(s % 60)).padStart(2,'0')}`;
+    }
+
+    audio.addEventListener('loadedmetadata', () => {
+      durationEl.textContent = fmt(audio.duration);
+    });
+
+    audio.addEventListener('timeupdate', () => {
+      const pct = audio.duration ? (audio.currentTime / audio.duration) * 100 : 0;
+      progressFill.style.width = pct + '%';
+      currentTimeEl.textContent = fmt(audio.currentTime);
+    });
+
+    audio.addEventListener('ended', () => {
+      playIcon.querySelector('path').setAttribute('d', PLAY_PATH);
+    });
+
+    function togglePlay() {
+      if (audio.paused) {
+        audio.play().catch(() => {});
+        playIcon.querySelector('path').setAttribute('d', PAUSE_PATH);
+      } else {
+        audio.pause();
+        playIcon.querySelector('path').setAttribute('d', PLAY_PATH);
+      }
+    }
+
+    function seekAudio(e) {
+      const rect = document.getElementById('progressBar').getBoundingClientRect();
+      const pct  = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+      if (audio.duration) audio.currentTime = pct * audio.duration;
+    }
+  </script>
+</body>
+</html>
