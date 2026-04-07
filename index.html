@@ -199,7 +199,7 @@
     <div class="card card-love love-card"><div class="shim"></div>
       <div class="card-label">Nine Reasons</div><h3>Things I Love About You</h3>
       <ul class="love-list">
-        <li><span class="love-num">01</span><span class="love-text">You support me - quietly, steadily, without being asked.</span><span class="love-heart">♥</span></li>
+        <li><span class="love-num">01</span><span class="love-text">You support me — quietly, steadily, without being asked.</span><span class="love-heart">♥</span></li>
         <li><span class="love-num">02</span><span class="love-text">You ragebait me and somehow that's one of my favourite things about you.</span><span class="love-heart">♥</span></li>
         <li><span class="love-num">03</span><span class="love-text">Your smile. I don't think I need to say more.</span><span class="love-heart">♥</span></li>
         <li><span class="love-num">04</span><span class="love-text">Talking to you makes every problem feel smaller than it actually is.</span><span class="love-heart">♥</span></li>
@@ -369,15 +369,80 @@ function goBack(){
 }
 
 /* audio */
-var audio=document.getElementById('audioEl'),pFill=document.getElementById('progressFill');
-var ctEl=document.getElementById('currentTime'),durEl=document.getElementById('duration');
+var audio=document.getElementById('audioEl');
+var pFill=document.getElementById('progressFill');
+var ctEl=document.getElementById('currentTime');
+var durEl=document.getElementById('duration');
+var trackTitle=document.querySelector('.track-title');
 var PLAY='M8 5v14l11-7z',PAUSE='M6 19h4V5H6v14zm8-14v14h4V5h-4z';
-function fmt(s){return Math.floor(s/60)+':'+('0'+Math.floor(s%60)).slice(-2);}
-audio.addEventListener('loadedmetadata',function(){durEl.textContent=fmt(audio.duration);});
-audio.addEventListener('timeupdate',function(){var p=audio.duration?(audio.currentTime/audio.duration)*100:0;pFill.style.width=p+'%';ctEl.textContent=fmt(audio.currentTime);});
-audio.addEventListener('ended',function(){document.getElementById('playIcon').querySelector('path').setAttribute('d',PLAY);});
-function togglePlay(){var pi=document.getElementById('playIcon').querySelector('path');if(audio.paused){audio.play().catch(function(){});pi.setAttribute('d',PAUSE);}else{audio.pause();pi.setAttribute('d',PLAY);}}
-function seekAudio(e){var r=document.getElementById('progressBar').getBoundingClientRect();if(audio.duration)audio.currentTime=Math.max(0,Math.min(1,(e.clientX-r.left)/r.width))*audio.duration;}
+
+function fmt(s){
+  if(isNaN(s)||!isFinite(s))return '0:00';
+  var m=Math.floor(s/60),sec=Math.floor(s%60);
+  return m+':'+('0'+sec).slice(-2);
+}
+
+/* show real filename from src */
+(function(){
+  var src=audio.src||audio.getAttribute('src')||'';
+  var name=src.split('/').pop().split('?')[0];
+  if(name&&trackTitle)trackTitle.textContent=name;
+})();
+
+/* duration — try loadedmetadata, fallback to durationchange */
+function onMeta(){
+  if(audio.duration&&isFinite(audio.duration)){
+    durEl.textContent=fmt(audio.duration);
+  }
+}
+audio.addEventListener('loadedmetadata',onMeta);
+audio.addEventListener('durationchange',onMeta);
+/* some browsers on iOS need this nudge */
+audio.addEventListener('canplay',onMeta);
+
+audio.addEventListener('timeupdate',function(){
+  if(!audio.duration||!isFinite(audio.duration))return;
+  var p=(audio.currentTime/audio.duration)*100;
+  pFill.style.width=p+'%';
+  ctEl.textContent=fmt(audio.currentTime);
+});
+
+audio.addEventListener('ended',function(){
+  document.getElementById('playIcon').querySelector('path').setAttribute('d',PLAY);
+  pFill.style.width='0%';
+  ctEl.textContent='0:00';
+});
+
+audio.addEventListener('error',function(){
+  durEl.textContent='—';
+  trackTitle.textContent='voice-memo.mp3';
+});
+
+function togglePlay(){
+  var pi=document.getElementById('playIcon').querySelector('path');
+  if(audio.paused){
+    audio.play().catch(function(){});
+    pi.setAttribute('d',PAUSE);
+  }else{
+    audio.pause();
+    pi.setAttribute('d',PLAY);
+  }
+}
+
+function seekAudio(e){
+  var r=document.getElementById('progressBar').getBoundingClientRect();
+  if(!audio.duration||!isFinite(audio.duration))return;
+  audio.currentTime=Math.max(0,Math.min(1,(e.clientX-r.left)/r.width))*audio.duration;
+}
+
+/* touch seek support for mobile */
+document.getElementById('progressBar').addEventListener('touchstart',function(e){
+  e.preventDefault();
+  var touch=e.touches[0];
+  var r=this.getBoundingClientRect();
+  if(!audio.duration||!isFinite(audio.duration))return;
+  audio.currentTime=Math.max(0,Math.min(1,(touch.clientX-r.left)/r.width))*audio.duration;
+},{passive:false});
 </script>
 </body>
 </html>
