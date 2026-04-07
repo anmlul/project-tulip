@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Tulip | The Ship</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="overlay">
+        <div class="content">
+            <h1>The Ship is Steady.</h1>
+            <p>Scan successful. Heart synchronized.</p>
+            <button onclick="enterSite()">Enter Sanctuary</button>
+        </div>
+    </div>
+
+    <main id="main-content" style="display: none;">
+        <div class="container">
+            <header>
+                <h2>For My Tulip 🌷</h2>
+                <div class="coordinates">53.3498° N, 6.2603° W (Dublin)</div>
+            </header>
+
+            <section class="card">
+                <h3>A Voice from Dublin</h3>
+                <p>Play this when the storm gets too loud.</p>
+                <audio controls>
+                    <source src="voice-memo.mp3" type="audio/mpeg">
+                    Your browser does not support the audio element.
+                </audio>
+            </section>
+
+            <section class="card">
+                <h3>Our Soundtrack</h3>
+                <iframe allow="autoplay *; encrypted-media *; fullscreen *; clipboard-write" frameborder="0" height="175" style="width:100%;max-width:660px;overflow:hidden;border-radius:10px;" sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-storage-access-by-user-activation allow-top-navigation-by-user-activation" src="https://embed.music.apple.com/ie/playlist/the-ship/pl.u-your-playlist-id"></iframe>
+            </section>
+
+            <footer>
+                <p>Status: <span class="status">Loved Forever</span></p>
+                <div class="dev-note"></div>
+            </footer>
+        </div>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>
